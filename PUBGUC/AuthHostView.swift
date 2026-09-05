@@ -5,10 +5,6 @@ struct AuthHostView: View {
     let onBrowse: () -> Void
 
     var body: some View {
-        AuthView()
-            .onAppear {
-                AuthBridge.shared.onLoggedIn = onLoggedIn
-                AuthBridge.shared.onBrowse = onBrowse
-            }
+        AuthView(onLoggedIn: onLoggedIn, onBrowse: onBrowse)
     }
 }

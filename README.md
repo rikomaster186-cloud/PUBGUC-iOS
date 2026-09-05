@@ -1,21 +1,14 @@
-# PUBGUC iOS
+# PUBGUC iPhone
 
-Native SwiftUI + WKWebView iOS version of the PUBGUC Android app.
+PUBGUC by TEKDEMONX.
 
-Features:
-- PUBGUC / by TEKDEMONX branding
+- iPhone only
+- iOS 16+
 - TR / EN
-- Native LOGIN / REGISTER screen
-- Uses existing website auth APIs
-- Opens https://x.tekdemonx.workers.dev after login
-- Hides website login/register while in app mode
-- Browse Website option
-- Persistent login flag
-- App icon assets included
+- Native LOGIN / REGISTER
+- Uses the existing TEKDEMONX Worker auth APIs
+- Opens the website inside WKWebView after login
+- Existing PUBGUC app icon assets included
+- GitHub Actions builds an unsigned `PUBGUC.ipa` for sideload signing/install with a compatible iOS sideload tool
 
-Build requirements:
-- macOS + Xcode
-- Apple signing certificate / Apple Developer account for device/App Store distribution
-
-Bundle ID: com.tekdemonx.pubguc
-Minimum iOS: 16.0
+Bundle ID: `com.tekdemonx.pubguc`

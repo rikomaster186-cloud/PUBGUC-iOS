@@ -1,10 +1,11 @@
 import SwiftUI
-import WebKit
 
 struct AuthView: View {
+    let onLoggedIn: () -> Void
+    let onBrowse: () -> Void
+
     @State private var language = "TR"
     @State private var mode: AuthMode? = nil
-    @State private var message = ""
 
     enum AuthMode { case login, register }
 
@@ -44,14 +45,12 @@ struct AuthView: View {
                     .padding(.bottom, 8)
 
                 if let mode = mode {
-                    AuthForm(mode: mode, language: language, onSuccess: {
-                        message = ""
-                    }, onDone: {
-                        NotificationCenter.default.post(name: .pubgucLoggedIn, object: nil)
-                    }, onCancel: {
-                        self.mode = nil
-                        self.message = ""
-                    })
+                    AuthForm(
+                        mode: mode,
+                        language: language,
+                        onDone: onLoggedIn,
+                        onCancel: { self.mode = nil }
+                    )
                 } else {
                     Button(language == "TR" ? "GİRİŞ YAP" : "LOGIN") {
                         mode = .login
@@ -64,42 +63,21 @@ struct AuthView: View {
                     .buttonStyle(DarkButtonStyle())
 
                     Button(language == "TR" ? "SİTEYE GÖZ AT" : "BROWSE WEBSITE") {
-                        NotificationCenter.default.post(name: .pubgucBrowse, object: nil)
+                        onBrowse()
                     }
                     .buttonStyle(LinkButtonStyle())
-                }
-
-                if !message.isEmpty {
-                    Text(message).foregroundColor(.red).font(.footnote)
                 }
 
                 Spacer()
             }
             .padding(24)
         }
-        .onReceive(NotificationCenter.default.publisher(for: .pubgucLoggedIn)) { _ in
-            AuthBridge.shared.onLoggedIn?()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .pubgucBrowse)) { _ in
-            AuthBridge.shared.onBrowse?()
-        }
-        .onAppear {
-            AuthBridge.shared.onLoggedIn = nil
-            AuthBridge.shared.onBrowse = nil
-        }
     }
-}
-
-final class AuthBridge {
-    static let shared = AuthBridge()
-    var onLoggedIn: (() -> Void)?
-    var onBrowse: (() -> Void)?
 }
 
 struct AuthForm: View {
     let mode: AuthView.AuthMode
     let language: String
-    let onSuccess: () -> Void
     let onDone: () -> Void
     let onCancel: () -> Void
 
@@ -179,11 +157,14 @@ struct AuthForm: View {
                         gender: gender,
                         kd: kd
                     )
+                    // Website registration creates the account only; sign in immediately
+                    // so the same website session cookie is available to the in-app WebView.
+                    try await API.login(username: username, password: password)
                 }
+
                 await MainActor.run {
                     loading = false
                     UserDefaults.standard.set(true, forKey: "pubguc_app_logged_in")
-                    onSuccess()
                     onDone()
                 }
             } catch {
